@@ -7,6 +7,13 @@ import (
 	"net/http"
 )
 
+// @Summary Create a new slug
+// @Description Create a new slug
+// @Accept  json
+// @Produce  json
+// @Param slug body models.Slug true "Slug object"
+// @Success 200 {object} pkg.StatusResponse "OK"
+// @Router /slug [post]
 func (ctrl *Controller) createSlug(c *gin.Context) {
 	var slug models.Slug
 
@@ -26,6 +33,13 @@ func (ctrl *Controller) createSlug(c *gin.Context) {
 
 }
 
+// @Summary Delete a slug
+// @Description Delete a slug
+// @Accept  json
+// @Produce  json
+// @Param name_slug path string true "Name of the slug"
+// @Success 200 {object} pkg.StatusResponse "OK"
+// @Router /slug/{name_slug} [delete]
 func (ctrl *Controller) deleteSlug(c *gin.Context) {
 	var slug models.Slug
 
@@ -42,6 +56,12 @@ func (ctrl *Controller) deleteSlug(c *gin.Context) {
 
 }
 
+// @Summary Get all slugs
+// @Description Get all slugs
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} models.Slug "List of slugs"
+// @Router /slug [get]
 func (ctrl *Controller) getSlugs(c *gin.Context) {
 	result, err := ctrl.service.GetSlugs()
 	if err != nil {

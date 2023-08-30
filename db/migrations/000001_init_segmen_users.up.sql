@@ -1,11 +1,20 @@
-CREATE TABLE "Slug"
+CREATE TABLE users
 (
-    "name_slug" VARCHAR(255),
+    id         SERIAL PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP,
+    segments   TEXT[]
 );
 
-CREATE TABLE "Users"
+CREATE TABLE segments
 (
-    "id" BIGSERIAL generated always as identity PRIMARY KEY,
-    "slugs" []VARCHAR(255) references "Slug",
+    slug TEXT PRIMARY KEY
 );
 
+CREATE TABLE user_segment_history
+(
+    user_id      INT,
+    segment_slug TEXT,
+    operation    TEXT,
+    timestamp    TIMESTAMP
+);

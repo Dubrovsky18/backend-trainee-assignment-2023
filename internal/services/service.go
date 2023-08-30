@@ -10,7 +10,7 @@ type TemplateServiceUserSlug interface {
 	GetSlugs() ([]models.Slug, error)
 	DeleteSlug(slug models.Slug) error
 
-	AddDelSlugToUser(uuidUser int, listForUser models.AddRemoveUserSlug) []error
+	AddDelSlugToUser(uuidUser int, listForUser models.AddRemoveUserSlug) error
 
 	GetUser(uuidUser int) (models.User, error)
 
@@ -22,7 +22,7 @@ type TemplateServiceRepoImpl struct {
 	repos repository.TemplateRepositoryUserSlug
 }
 
-func (t TemplateServiceRepoImpl) AddDelSlugToUser(uuidUser int, listForUser models.AddRemoveUserSlug) []error {
+func (t TemplateServiceRepoImpl) AddDelSlugToUser(uuidUser int, listForUser models.AddRemoveUserSlug) error {
 	return t.repos.AddDelSlugToUser(uuidUser, listForUser)
 }
 
@@ -50,6 +50,6 @@ func (t TemplateServiceRepoImpl) DeleteUser(uuidUser int) error {
 	return t.repos.DeleteUser(uuidUser)
 }
 
-func NewTemplateRepository(repos *repository.TemplateRepositoryImpl) *TemplateServiceRepoImpl {
+func NewTemplateRepository(repos repository.TemplateRepositoryUserSlug) *TemplateServiceRepoImpl {
 	return &TemplateServiceRepoImpl{repos: repos}
 }

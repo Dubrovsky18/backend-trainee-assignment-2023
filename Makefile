@@ -17,3 +17,6 @@ test:
 .PHONY: build
 build:
 	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/app ./cmd/app
+
+swagger:
+	swag init --parseDependency -g cmd/app/main.go --output=./api

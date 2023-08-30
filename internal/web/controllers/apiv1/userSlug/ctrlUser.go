@@ -9,6 +9,14 @@ import (
 	"strconv"
 )
 
+// @Summary Create a new user
+// @Description Create a new user
+// @Accept  json
+// @Produce  json
+// @Param user_id path int true "User ID"
+// @Param client body models.User true "User object"
+// @Success 200 {object} map[string]interface{} "User id"
+// @Router /user/{user_id} [post]
 func (ctrl *Controller) createUser(c *gin.Context) {
 	var client models.User
 
@@ -28,6 +36,13 @@ func (ctrl *Controller) createUser(c *gin.Context) {
 	})
 }
 
+// @Summary Delete a user
+// @Description Delete a user
+// @Accept  json
+// @Produce  json
+// @Param user_id path int true "User ID"
+// @Success 200 {object} pkg.StatusResponse "OK"
+// @Router /user/{user_id} [delete]
 func (ctrl *Controller) deleteUser(c *gin.Context) {
 	var client models.User
 
@@ -48,6 +63,13 @@ func (ctrl *Controller) deleteUser(c *gin.Context) {
 	})
 }
 
+// @Summary Get user's slugs
+// @Description Get user's slugs
+// @Accept  json
+// @Produce  json
+// @Param user_id path int true "User ID"
+// @Success 200 {object} map[string]interface{} "User slugs"
+// @Router /user/{user_id} [get]
 func (ctrl *Controller) getUser(c *gin.Context) {
 	clientId, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
@@ -66,7 +88,15 @@ func (ctrl *Controller) getUser(c *gin.Context) {
 	})
 }
 
-func (ctrl *Controller) AddDelSlugInUser(c *gin.Context) {
+// @Summary Add or delete slugs for a user
+// @Description Add or delete slugs for a user
+// @Accept  json
+// @Produce  json
+// @Param user_id path int true "User ID"
+// @Param listAddDel body models.AddRemoveUserSlug true "List of slugs to add or delete"
+// @Success 200 {object} pkg.StatusResponse "OK"
+// @Router /user/{user_id}/slug [post]
+func (ctrl *Controller) addDelSlugInUser(c *gin.Context) {
 	var listAddDel models.AddRemoveUserSlug
 	var client models.User
 	var err error = nil
@@ -82,10 +112,10 @@ func (ctrl *Controller) AddDelSlugInUser(c *gin.Context) {
 		return
 	}
 
-	errArray := ctrl.service.AddDelSlugToUser(client.Id, listAddDel)
-	if len(errArray) > 0 {
-		pkg.NewErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Failed to add or del for user: %s", errArray))
-		return
+	err = ctrl.service.AddDelSlugToUser(client.Id, listAddDel)
+	if err != nil {
+		pkg.NewErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Error with add / del slugs: %s", err.Error()))
+
 	}
 
 	c.JSON(http.StatusOK, pkg.StatusResponse{

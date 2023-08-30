@@ -16,7 +16,7 @@ type Database struct {
 	DBName   string
 }
 
-var config *Config
+var config *Config = nil
 
 func GetConfig() *Config {
 	if config != nil {
