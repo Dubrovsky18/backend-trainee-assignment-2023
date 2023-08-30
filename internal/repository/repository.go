@@ -6,6 +6,13 @@ import (
 	"github.com/Dubrovsky18/backend-trainee-assignment-2023/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
+)
+
+const (
+	tableRelation = "relation_user_slugs"
+	tableUser     = "users"
+	tableSlug     = "slugs"
 )
 
 type TemplateRepositoryUserSlug interface {
@@ -15,7 +22,7 @@ type TemplateRepositoryUserSlug interface {
 
 	CreateUser(user models.User) (int, error)
 	GetUser(uuidUser int) (models.User, error)
-	AddDelSlugToUser(uuidUser int, listForUser models.AddRemoveUserSlug) error
+	AddDelSlugToUser(uuidUser int, listForUser models.AddRemoveUserSlug) []error
 	DeleteUser(uuidUser int) error
 }
 
@@ -24,70 +31,90 @@ type TemplateRepositoryImpl struct {
 }
 
 func (t TemplateRepositoryImpl) CreateSlug(slug models.Slug) error {
-	result := t.db.Create(&slug)
-	return result.Error
+	var existingSlug models.Slug
+	result := t.db.Table(tableSlug).Where("name = ?", slug.NameSlug).First(&existingSlug)
+
+	if existingSlug.ID == 0 {
+		result = t.db.Table(tableSlug).Create(&slug)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
 }
 
 func (t TemplateRepositoryImpl) GetSlugs() ([]models.Slug, error) {
 	var slugs []models.Slug
-	result := t.db.Find(&slugs)
+	result := t.db.Table(tableSlug).Find(&slugs)
 	return slugs, result.Error
 }
 
 func (t TemplateRepositoryImpl) DeleteSlug(slug models.Slug) error {
-	result := t.db.Delete(&slug)
+	result := t.db.Table(tableSlug).Delete(&slug)
 	return result.Error
 }
 
 func (t TemplateRepositoryImpl) CreateUser(user models.User) (int, error) {
-	result := t.db.Create(&user)
+	result := t.db.Table(tableUser).Create(&user)
 	return user.Id, result.Error
+
 }
 
 func (t TemplateRepositoryImpl) GetUser(uuidUser int) (models.User, error) {
 	var user models.User
-	result := t.db.Where("user_id = ? ", uuidUser).Find(&user.Slugs)
-	return user, result.Error
+
+	result := t.db.Table(tableRelation).Where("user_id = ?", uuidUser).Find(&user.Slugs)
+	if result.Error != nil {
+		return user, result.Error
+	}
+
+	return user, nil
 }
 
-func (t TemplateRepositoryImpl) AddDelSlugToUser(uuidUser int, listForUser models.AddRemoveUserSlug) error {
+func (t TemplateRepositoryImpl) AddDelSlugToUser(uuidUser int, listForUser models.AddRemoveUserSlug) []error {
 	var user models.User
-	var slug models.Slug
-	if err := t.db.First(&user, uuidUser).Error; err != nil {
-		return err
-	}
+	user.Id = uuidUser
+	var errArray []error
 
-	for _, addSegment := range listForUser.AddSegments {
-		var segment models.Slug
-		if err := t.db.Where("name_slug = ?", addSegment).First(&segment).Error; err != nil {
-			continue
-		}
-		user.Slugs = append(user.Slugs, segment.NameSlug)
-	}
-
-	for _, removeSegment := range listForUser.RemoveSegments {
-		for i, segment := range user.Slugs {
-			if segment == removeSegment {
-				user.Slugs = append(user.Slugs[:i], user.Slugs[i+1:]...)
-				break
+	if err := t.db.Table(tableUser).Where("id = ?", user.Id).First(&user).Error; err != nil {
+		return []error{err}
+	} else {
+		for _, addSegment := range listForUser.AddSegments {
+			var segment models.Slug
+			if err := t.db.Where("name_slug = ?", addSegment).First(&segment).Error; err != nil {
+				errArray = append(errArray, err)
+				continue
+			} else {
+				var relation models.RelationUserSlug
+				if err := t.db.Table(tableRelation).Where("name_slug = ? AND user_id = ?", addSegment, user.Id).First(&relation).Error; err != nil {
+					relation = models.RelationUserSlug{
+						UserId:   user.Id,
+						NameSlug: addSegment,
+					}
+					if err := t.db.Create(&relation).Error; err != nil {
+						errArray = append(errArray, err)
+					}
+				} else {
+					errArray = append(errArray, fmt.Errorf("Slug = %s with user = %s already in base\n", addSegment, user.Id))
+				}
 			}
 		}
 	}
 
-	if err := t.db.Save(&user).Error; err != nil {
-		return err
+	for _, removeSegment := range listForUser.RemoveSegments {
+		var relation models.RelationUserSlug
+		if err := t.db.Unscoped().Where("user_id = ? AND name_slug = ?", user.Id, removeSegment).Delete(&relation).Error; err != nil {
+			errArray = append(errArray, err)
+		}
 	}
-	if err := t.db.Save(&slug).Error; err != nil {
-		return err
-	}
-
-	return nil
-
+	return errArray
 }
 
 func (t TemplateRepositoryImpl) DeleteUser(uuidUser int) error {
-	result := t.db.Delete(uuidUser)
+	result := t.db.Table(tableUser).Delete(uuidUser)
 	return result.Error
+
 }
 
 func NewTemplateRepository() *TemplateRepositoryImpl {
@@ -95,9 +122,16 @@ func NewTemplateRepository() *TemplateRepositoryImpl {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		cfg.Database.Host, cfg.Database.User, cfg.Database.Password, cfg.Database.DBName, cfg.Database.Port)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	db.AutoMigrate(&models.User{}, &models.Slug{})
 	if err != nil {
 		panic("failed to connect database")
+	}
+	err = db.AutoMigrate(&models.User{}, &models.Slug{})
+	if err != nil {
+		log.Fatalf("Migrate User and Slug not to do: %s", err.Error())
+	}
+	err = db.AutoMigrate(&models.RelationUserSlug{})
+	if err != nil {
+		log.Fatalf("Migrate Relation not to do: %s", err.Error())
 	}
 	pgSvc := &TemplateRepositoryImpl{db: db}
 	return pgSvc

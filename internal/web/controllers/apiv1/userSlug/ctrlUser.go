@@ -12,10 +12,9 @@ import (
 func (ctrl *Controller) createUser(c *gin.Context) {
 	var client models.User
 
-	if err := c.BindJSON(&client); err != nil {
-		pkg.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
+	client.Id, _ = strconv.Atoi(c.Param("user_id"))
+
+	c.BindJSON(&client)
 
 	uuidUser, err := ctrl.service.CreateUser(client)
 
@@ -50,34 +49,31 @@ func (ctrl *Controller) deleteUser(c *gin.Context) {
 }
 
 func (ctrl *Controller) getUser(c *gin.Context) {
-	var client models.User
-
-	var err error
-	client.Id, err = strconv.Atoi(c.Param("user_id"))
+	clientId, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
-		pkg.NewErrorResponse(c, http.StatusInternalServerError, "Failed read user_id")
+		pkg.NewErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Failed read user_id: %s", err.Error()))
 		return
 	}
 
-	client, err = ctrl.service.GetUser(client.Id)
+	client, err := ctrl.service.GetUser(clientId)
 	if err != nil {
 		pkg.NewErrorResponse(c, http.StatusInternalServerError, "Failed find user")
 		return
 	}
 
 	c.JSON(http.StatusOK, map[string]interface{}{
-		fmt.Sprintf("User: %s", client.Id): fmt.Sprintf("Slugs: %s", client.Slugs),
+		strconv.Itoa(clientId): client.Slugs,
 	})
 }
 
 func (ctrl *Controller) AddDelSlugInUser(c *gin.Context) {
 	var listAddDel models.AddRemoveUserSlug
 	var client models.User
-	var err error
+	var err error = nil
 
 	client.Id, err = strconv.Atoi(c.Param("user_id"))
 	if err != nil {
-		pkg.NewErrorResponse(c, http.StatusBadRequest, "Failed read user_id")
+		pkg.NewErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("Failed read user_id: %s", err.Error()))
 		return
 	}
 
@@ -86,14 +82,13 @@ func (ctrl *Controller) AddDelSlugInUser(c *gin.Context) {
 		return
 	}
 
-	err = ctrl.service.AddDelSlugToUser(client.Id, listAddDel)
-	if err != nil {
-		pkg.NewErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Failed to add or del for user: %s"))
+	errArray := ctrl.service.AddDelSlugToUser(client.Id, listAddDel)
+	if len(errArray) > 0 {
+		pkg.NewErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Failed to add or del for user: %s", errArray))
 		return
 	}
 
 	c.JSON(http.StatusOK, pkg.StatusResponse{
 		Status: "Ok",
 	})
-
 }

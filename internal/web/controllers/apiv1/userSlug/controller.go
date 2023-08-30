@@ -25,6 +25,7 @@ func (ctrl *Controller) DefineRoutes(r gin.IRouter) {
 
 	{
 		users.POST("/create", ctrl.createUser)
+		users.POST("/create/:user_id", ctrl.createUser)
 		users.POST("/add_del_slug/:user_id", ctrl.AddDelSlugInUser)
 		users.GET("/get_slugs/:user_id", ctrl.getUser)
 		users.DELETE("/delete/:user_id", ctrl.deleteUser)
