@@ -1,0 +1,246 @@
+definitions:
+  github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_app_build.Info:
+    properties:
+      arch:
+        type: string
+      build_date:
+        type: string
+      commit_hash:
+        type: string
+      compiler:
+        type: string
+      go_version:
+        type: string
+      os:
+        type: string
+      version:
+        type: string
+    type: object
+  github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.AddRemoveUserSlug:
+    properties:
+      add_segments:
+        items:
+          type: string
+        type: array
+      del_segments:
+        items:
+          type: string
+        type: array
+    type: object
+  github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.Slug:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      name_slug:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      slug:
+        items:
+          type: string
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  internal_web_controllers_apiv1_status.Response:
+    properties:
+      build:
+        $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_app_build.Info'
+      id:
+        type: string
+      status:
+        type: string
+    type: object
+  internal_web_controllers_apiv1_status.ResponseDoc:
+    properties:
+      data:
+        properties:
+          attributes:
+            $ref: '#/definitions/internal_web_controllers_apiv1_status.Response'
+        type: object
+    type: object
+  pkg.StatusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/status:
+    get:
+      consumes:
+      - application/json
+      description: get status
+      operationId: get-status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_web_controllers_apiv1_status.ResponseDoc'
+      summary: Get Application Status
+  /slug:
+    get:
+      consumes:
+      - application/json
+      description: Get all slugs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of slugs
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.Slug'
+            type: array
+      summary: Get all slugs
+    post:
+      consumes:
+      - application/json
+      description: Create a new slug
+      parameters:
+      - description: Slug object
+        in: body
+        name: slug
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.Slug'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg.StatusResponse'
+      summary: Create a new slug
+  /slug/{name_slug}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a slug
+      parameters:
+      - description: Name of the slug
+        in: path
+        name: name_slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg.StatusResponse'
+      summary: Delete a slug
+  /user/{user_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg.StatusResponse'
+      summary: Delete a user
+    get:
+      consumes:
+      - application/json
+      description: Get user's slugs
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User slugs
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user's slugs
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: User object
+        in: body
+        name: client
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User id
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new user
+  /user/{user_id}/slug:
+    post:
+      consumes:
+      - application/json
+      description: Add or delete slugs for a user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: List of slugs to add or delete
+        in: body
+        name: listAddDel
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.AddRemoveUserSlug'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg.StatusResponse'
+      summary: Add or delete slugs for a user
+swagger: "2.0"
