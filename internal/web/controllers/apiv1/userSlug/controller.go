@@ -26,10 +26,9 @@ func (ctrl *Controller) DefineRoutes(r gin.IRouter) {
 	{
 		users.POST("/create", ctrl.createUser)
 		users.POST("/create/:user_id", ctrl.createUser)
-		users.POST("/add_del_slug/:user_id", ctrl.AddDelSlugInUser)
+		users.POST("/add_del_slug/:user_id", ctrl.addDelSlugInUser)
 		users.GET("/get_slugs/:user_id", ctrl.getUser)
 		users.DELETE("/delete/:user_id", ctrl.deleteUser)
-
 	}
 
 	slug := apiVer.Group("/slug")
@@ -37,6 +36,13 @@ func (ctrl *Controller) DefineRoutes(r gin.IRouter) {
 	{
 		slug.POST("/create", ctrl.createSlug)
 		slug.DELETE("/delete/:name_slug", ctrl.deleteSlug)
+		slug.GET("/get_all", ctrl.getSlugs)
 
+	}
+
+	extraUser := users.Group("/extra")
+
+	{
+		extraUser.GET("/history/:user_id", ctrl.getSegmentsHistory)
 	}
 }

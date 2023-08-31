@@ -13,7 +13,7 @@ import (
 // @Produce  json
 // @Param slug body models.Slug true "Slug object"
 // @Success 200 {object} pkg.StatusResponse "OK"
-// @Router /slug [post]
+// @Router /api/v1/slug/create [post]
 func (ctrl *Controller) createSlug(c *gin.Context) {
 	var slug models.Slug
 
@@ -38,12 +38,15 @@ func (ctrl *Controller) createSlug(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name_slug path string true "Name of the slug"
+// @Param slug body models.Slug true "name_slug"
 // @Success 200 {object} pkg.StatusResponse "OK"
-// @Router /slug/{name_slug} [delete]
+// @Router /api/v1/slug/delete/{name_slug} [delete]
 func (ctrl *Controller) deleteSlug(c *gin.Context) {
 	var slug models.Slug
 
 	slug.NameSlug = c.Param("name_slug")
+
+	c.BindJSON(&slug)
 
 	if err := ctrl.service.DeleteSlug(slug); err != nil {
 		pkg.NewErrorResponse(c, http.StatusInternalServerError, "Failed to delete slug")
@@ -61,7 +64,7 @@ func (ctrl *Controller) deleteSlug(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {array} models.Slug "List of slugs"
-// @Router /slug [get]
+// @Router /api/v1/slug/get_all [get]
 func (ctrl *Controller) getSlugs(c *gin.Context) {
 	result, err := ctrl.service.GetSlugs()
 	if err != nil {
