@@ -1,15 +1,29 @@
 CREATE TABLE users
 (
-    id         SERIAL PRIMARY KEY,
+    id         BIGINt PRIMARY KEY,
     created_at TIMESTAMP DEFAULT current_timestamp,
     updated_at TIMESTAMP,
-    segments   TEXT[]
+    deleted_at TIMESTAMP
 );
 
 CREATE TABLE segments
 (
-    slug TEXT PRIMARY KEY
+    slug TEXT PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP
 );
+
+CREATE TABLE relation_user_slugs
+(
+    id BIGINT PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    user_id bigint references users,
+    name_slug text references segments
+)
+
 
 CREATE TABLE user_segment_history
 (
