@@ -4,49 +4,7 @@
         "contact": {}
     },
     "paths": {
-        "/api/v1/status": {
-            "get": {
-                "description": "get status",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Get Application Status",
-                "operationId": "get-status",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_web_controllers_apiv1_status.ResponseDoc"
-                        }
-                    }
-                }
-            }
-        },
-        "/slug": {
-            "get": {
-                "description": "Get all slugs",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Get all slugs",
-                "responses": {
-                    "200": {
-                        "description": "List of slugs",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.Slug"
-                            }
-                        }
-                    }
-                }
-            },
+        "/api/v1/slug/create": {
             "post": {
                 "description": "Create a new slug",
                 "consumes": [
@@ -77,7 +35,7 @@
                 }
             }
         },
-        "/slug/{name_slug}": {
+        "/api/v1/slug/delete/{name_slug}": {
             "delete": {
                 "description": "Delete a slug",
                 "consumes": [
@@ -94,6 +52,15 @@
                         "name": "name_slug",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "name_slug",
+                        "name": "slug",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.Slug"
+                        }
                     }
                 ],
                 "responses": {
@@ -106,16 +73,60 @@
                 }
             }
         },
-        "/user/{user_id}": {
+        "/api/v1/slug/get_all": {
             "get": {
-                "description": "Get user's slugs",
+                "description": "Get all slugs",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Get user's slugs",
+                "summary": "Get all slugs",
+                "responses": {
+                    "200": {
+                        "description": "List of slugs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.Slug"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/status": {
+            "get": {
+                "description": "get status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Application Status",
+                "operationId": "get-status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_web_controllers_apiv1_status.ResponseDoc"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/add_del_slug/{user_id}": {
+            "post": {
+                "description": "Add or delete slugs for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Add or delete slugs for a user",
                 "parameters": [
                     {
                         "type": "integer",
@@ -123,18 +134,28 @@
                         "name": "user_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "List of slugs to add or delete",
+                        "name": "listAddDel",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.AddRemoveUserSlug"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "User slugs",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/pkg.StatusResponse"
                         }
                     }
                 }
-            },
+            }
+        },
+        "/api/v1/users/create": {
             "post": {
                 "description": "Create a new user",
                 "consumes": [
@@ -171,7 +192,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/api/v1/users/delete/{user_id}": {
             "delete": {
                 "description": "Delete a user",
                 "consumes": [
@@ -200,16 +223,14 @@
                 }
             }
         },
-        "/user/{user_id}/slug": {
-            "post": {
-                "description": "Add or delete slugs for a user",
-                "consumes": [
-                    "application/json"
-                ],
+        "/api/v1/users/extra/history/{user_id}": {
+            "get": {
+                "description": "Get segments history for a user within a specified period",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Add or delete slugs for a user",
+                "summary": "Get segments history for a user",
+                "operationId": "get-segments-history",
                 "parameters": [
                     {
                         "type": "integer",
@@ -219,20 +240,56 @@
                         "required": true
                     },
                     {
-                        "description": "List of slugs to add or delete",
-                        "name": "listAddDel",
+                        "description": "User history information",
+                        "name": "history",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.AddRemoveUserSlug"
+                            "$ref": "#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.UserHistory"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "CSV file containing user's segment history",
                         "schema": {
-                            "$ref": "#/definitions/pkg.StatusResponse"
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/get_slugs/{user_id}": {
+            "get": {
+                "description": "Get user's slugs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get user's slugs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User slugs",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -326,6 +383,26 @@
                 }
             }
         },
+        "github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.UserHistory": {
+            "type": "object",
+            "properties": {
+                "month_finish": {
+                    "type": "integer"
+                },
+                "month_start": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "year_finish": {
+                    "type": "integer"
+                },
+                "year_start": {
+                    "type": "integer"
+                }
+            }
+        },
         "gorm.DeletedAt": {
             "type": "object",
             "properties": {
@@ -362,6 +439,14 @@
                             "$ref": "#/definitions/internal_web_controllers_apiv1_status.Response"
                         }
                     }
+                }
+            }
+        },
+        "pkg.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },

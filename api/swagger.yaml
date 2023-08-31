@@ -55,6 +55,19 @@ definitions:
       updatedAt:
         type: string
     type: object
+  github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.UserHistory:
+    properties:
+      month_finish:
+        type: integer
+      month_start:
+        type: integer
+      user_id:
+        type: integer
+      year_finish:
+        type: integer
+      year_start:
+        type: integer
+    type: object
   gorm.DeletedAt:
     properties:
       time:
@@ -80,6 +93,11 @@ definitions:
             $ref: '#/definitions/internal_web_controllers_apiv1_status.Response'
         type: object
     type: object
+  pkg.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
   pkg.StatusResponse:
     properties:
       status:
@@ -88,35 +106,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/v1/status:
-    get:
-      consumes:
-      - application/json
-      description: get status
-      operationId: get-status
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_web_controllers_apiv1_status.ResponseDoc'
-      summary: Get Application Status
-  /slug:
-    get:
-      consumes:
-      - application/json
-      description: Get all slugs
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of slugs
-          schema:
-            items:
-              $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.Slug'
-            type: array
-      summary: Get all slugs
+  /api/v1/slug/create:
     post:
       consumes:
       - application/json
@@ -136,7 +126,7 @@ paths:
           schema:
             $ref: '#/definitions/pkg.StatusResponse'
       summary: Create a new slug
-  /slug/{name_slug}:
+  /api/v1/slug/delete/{name_slug}:
     delete:
       consumes:
       - application/json
@@ -147,6 +137,12 @@ paths:
         name: name_slug
         required: true
         type: string
+      - description: name_slug
+        in: body
+        name: slug
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.Slug'
       produces:
       - application/json
       responses:
@@ -155,17 +151,52 @@ paths:
           schema:
             $ref: '#/definitions/pkg.StatusResponse'
       summary: Delete a slug
-  /user/{user_id}:
-    delete:
+  /api/v1/slug/get_all:
+    get:
       consumes:
       - application/json
-      description: Delete a user
+      description: Get all slugs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of slugs
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.Slug'
+            type: array
+      summary: Get all slugs
+  /api/v1/status:
+    get:
+      consumes:
+      - application/json
+      description: get status
+      operationId: get-status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_web_controllers_apiv1_status.ResponseDoc'
+      summary: Get Application Status
+  /api/v1/users/add_del_slug/{user_id}:
+    post:
+      consumes:
+      - application/json
+      description: Add or delete slugs for a user
       parameters:
       - description: User ID
         in: path
         name: user_id
         required: true
         type: integer
+      - description: List of slugs to add or delete
+        in: body
+        name: listAddDel
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.AddRemoveUserSlug'
       produces:
       - application/json
       responses:
@@ -173,26 +204,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/pkg.StatusResponse'
-      summary: Delete a user
-    get:
-      consumes:
-      - application/json
-      description: Get user's slugs
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User slugs
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get user's slugs
+      summary: Add or delete slugs for a user
+  /api/v1/users/create:
     post:
       consumes:
       - application/json
@@ -218,23 +231,17 @@ paths:
             additionalProperties: true
             type: object
       summary: Create a new user
-  /user/{user_id}/slug:
-    post:
+  /api/v1/users/delete/{user_id}:
+    delete:
       consumes:
       - application/json
-      description: Add or delete slugs for a user
+      description: Delete a user
       parameters:
       - description: User ID
         in: path
         name: user_id
         required: true
         type: integer
-      - description: List of slugs to add or delete
-        in: body
-        name: listAddDel
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.AddRemoveUserSlug'
       produces:
       - application/json
       responses:
@@ -242,5 +249,53 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/pkg.StatusResponse'
-      summary: Add or delete slugs for a user
+      summary: Delete a user
+  /api/v1/users/extra/history/{user_id}:
+    get:
+      description: Get segments history for a user within a specified period
+      operationId: get-segments-history
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: User history information
+        in: body
+        name: history
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dubrovsky18_backend-trainee-assignment-2023_internal_models.UserHistory'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CSV file containing user's segment history
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Get segments history for a user
+  /api/v1/users/get_slugs/{user_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user's slugs
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User slugs
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user's slugs
 swagger: "2.0"

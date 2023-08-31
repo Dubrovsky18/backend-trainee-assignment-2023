@@ -129,7 +129,7 @@ func (ctrl *Controller) addDelSlugInUser(c *gin.Context) {
 // @Param user_id path int true "User ID"
 // @Param history body models.UserHistory true "User history information"
 // @Success 200 {string} string "CSV file containing user's segment history"
-// @Failure 400 {object} ErrorResponse "Bad request"
+// @Failure 400 {object} pkg.ErrorResponse "Bad request"
 // @Router /api/v1/users/extra/history/{user_id} [get]
 func (ctrl *Controller) getSegmentsHistory(c *gin.Context) {
 

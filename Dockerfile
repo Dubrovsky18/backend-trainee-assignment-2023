@@ -1,15 +1,19 @@
-FROM golang:1.19 as builder
+FROM golang:alpine as builder
+
+#RUN apk update && apk add --no-cache git && apk add --no-cach bash && apk add build-base
 
 RUN mkdir /app
 WORKDIR /app
+
 COPY . .
-RUN go mod download
+COPY .env .
 
+RUN go get -d -v ./...
 
-RUN make build
+RUN go install -v ./...
 
-# production stage
-FROM ubuntu:20.04
-COPY --from=builder /app/api ./api
-COPY --from=builder /app/build .
-CMD ["./app", "s"]
+RUN go build -o /build
+
+EXPOSE 4443
+
+CMD [ "/build" ]

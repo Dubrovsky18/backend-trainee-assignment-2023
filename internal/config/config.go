@@ -29,7 +29,7 @@ func GetConfig() *Config {
 			Port:     envy.Get("POSTGRES_PORT", "2345"),
 			User:     envy.Get("POSTGRES_USER", "postgres"),
 			Password: envy.Get("POSTGRES_PASSWORD", "postgres"),
-			DBName:   envy.Get("POSTGRES_NAME", "postgres"),
+			DBName:   envy.Get("POSTGRES_DB", "postgres"),
 		},
 	}
 }
