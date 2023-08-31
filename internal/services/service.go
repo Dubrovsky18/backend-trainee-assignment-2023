@@ -62,7 +62,7 @@ func (t TemplateServiceRepoImpl) GetSegmentHistory(userID, yearStart, yearFinish
 
 	history, err := t.Repos.GetSegmentHistory(userID, yearStart, yearFinish, monthStart, monthFinish)
 
-	file, err := os.Create(fmt.Sprintf("files/report_%s.csv", userID))
+	file, err := os.Create(fmt.Sprintf("files/report_%d.csv", userID))
 	if err != nil {
 		return "", err
 	}
